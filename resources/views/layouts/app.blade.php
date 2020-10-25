@@ -39,8 +39,8 @@
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ml-auto">
                         <!-- Authentication Links -->
-                        <li>
-                          <a href="#">Post</a>
+                        <li class="nav-item">
+                          <a class="nav-link" href="{{ route('guest.posts.home')}}">Post</a>
                         </li>
                         @guest
                             <li class="nav-item">

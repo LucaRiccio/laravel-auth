@@ -12,7 +12,7 @@
       </div>
   @endif
 
-  <form action="{{ route('posts.store') }}" method="post">
+  <form action="{{ route('posts.store') }}" method="post" enctype="multipart/form-data">
     @csrf
     @method('POST')
 
@@ -20,6 +20,11 @@
       <label for="title">Titolo</label>
       <input type="text" name="title" class="form-control" placeholder="Inserisci il titolo">
     </div>
+
+      <div class="form-group">
+        <label for="img">Immagine</label>
+        <input type="file" name="img" accept="image/*">
+      </div>
 
     <div class="form-group">
       <label for="body">Body</label>

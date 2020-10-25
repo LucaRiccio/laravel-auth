@@ -5,8 +5,8 @@
     Benvenuto
   </div>
   @guest
-    <p class="lead">Guest</p>
+    <p class="p-5 text-center" class="lead">Guest</p>
   @else
-    <p class="lead">Il tuo nome è {{ Auth::user()->name }}</p>
+    <p class="text-center" class="lead">Il tuo nome è {{ Auth::user()->name }}</p>
   @endguest
 @endsection

@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Post;
 use App\Tag;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -21,7 +23,7 @@ class PostController extends Controller
       return view ('admin.posts.index',compact('posts'));
 
 
-      return view('admin.posts.index', compact('posts'));
+      // return view('admin.posts.index', compact('posts'));
     }
 
     /**
@@ -47,21 +49,28 @@ class PostController extends Controller
       $data = $request->all();
       $request->validate([
         'title'=> 'required|min:5|max:100',
-        'body'=> 'required|min:5|max:500'
+        'body'=> 'required|min:5|max:500',
+        'img' => 'image'
       ]);
       $data['user_id'] = Auth::id();
       $data['slug'] = Str::slug($data['title'],'-');
       $newPost= new Post();
+
+      if (!empty($data['img'])) {
+        $data['img']= Storage::disk('public')->put('images', $data['img']);
+      }
+
       $newPost->fill($data);
-
-
 
       $saved = $newPost->save();
 
-      $newPost->tags()->attach($data['tags']);
-      // dd($saved);
+
+      if (!empty($data['tags'])) {
+        $newPost->tags()->attach($data['tags']);
+      }
+
       if ($saved) {
-        return redirect()->route('posts.index');
+        return redirect()->route('posts.index')->with('insert','Hai inserito correttamente il post');
       }
     }
 
@@ -100,17 +109,34 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post)
     {
-      // dd($request->all());
 
       $data = $request->all();
       $data['slug'] = Str::slug($data['title'],'-');
-      // dd($post->user_id);
+      $data['updated_at'] = Carbon::now('Europe/Rome');
 
-      $post->tags()->sync($data['tags']);
+      if (!empty($data['tags'])){
+        $post->tags()->sync($data['tags']);
+      } else {
+        $post->tags()->detach();
+      }
 
-      $post->update($data);
-      $post->save();
-      return redirect()->route('posts.index')->with('status',"Hai modificato correttamente il post dell'id: " . $post->id);
+      if (!empty($data['img'])){
+
+        if (!empty($post->img)) {
+          Storage::disk('public')->delete($post->img);
+        }
+        
+        $data['img'] = Storage::disk('public')->put('images', $data['img']);
+      }
+
+      $updated = $post->update($data);
+
+      if ($updated) {
+        return redirect()->route('posts.index')->with('update',"Hai modificato correttamente il post dell'id: " . $post->id);
+      }
+
+      // $post->save();
+      // return redirect()->route('posts.index')->with('status',"Hai modificato correttamente il post dell'id: " . $post->id);
     }
 
     /**
